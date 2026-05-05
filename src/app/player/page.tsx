@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { BanList } from '@/components/BanCard'
@@ -39,7 +39,7 @@ function PlayerContent() {
 
   if (!steamId) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-cs2-dark">
+      <div className="flex min-h-[60vh] items-center justify-center">
         <p className="text-gray-400">No Steam ID provided</p>
       </div>
     )
@@ -47,37 +47,18 @@ function PlayerContent() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <PlayerStats
-        steamId={steamId}
-        username={profile?.username}
-        banCount={bans.length}
-        matchCount={matches.length}
-      />
+      <PlayerStats steamId={steamId} username={profile?.username} banCount={bans.length} matchCount={matches.length} />
 
       <div className="mb-6 mt-8 flex gap-4 border-b border-cs2-light">
-        <button
-          onClick={() => setTab('bans')}
-          className={`border-b-2 px-4 py-2 font-medium ${
-            tab === 'bans' ? 'border-cs2-orange text-cs2-orange' : 'text-gray-400 hover:text-white'
-          }`}
-        >
+        <button onClick={() => setTab('bans')} className={`border-b-2 px-4 py-2 font-medium ${tab === 'bans' ? 'border-cs2-orange text-cs2-orange' : 'text-gray-400'}`}>
           Bans ({bans.length})
         </button>
-        <button
-          onClick={() => setTab('matches')}
-          className={`border-b-2 px-4 py-2 font-medium ${
-            tab === 'matches' ? 'border-cs2-orange text-cs2-orange' : 'text-gray-400 hover:text-white'
-          }`}
-        >
+        <button onClick={() => setTab('matches')} className={`border-b-2 px-4 py-2 font-medium ${tab === 'matches' ? 'border-cs2-orange text-cs2-orange' : 'text-gray-400'}`}>
           Matches ({matches.length})
         </button>
       </div>
 
-      {tab === 'bans' ? (
-        <BanList bans={bans} category={category} onCategoryChange={setCategory} />
-      ) : (
-        <MatchList matches={matches} />
-      )}
+      {tab === 'bans' ? <BanList bans={bans} category={category} onCategoryChange={setCategory} /> : <MatchList matches={matches} />}
     </div>
   )
 }
