@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { BanList } from '@/components/BanCard'
-import { SteamIdInput, PlayerStats } from '@/components/MatchCard'
+import { SteamIdInput } from '@/components/MatchCard'
+import { Navbar } from '@/components/Navbar'
+import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { BanTypeToggle, BanCategory } from '@/components/BanTypeToggle'
 import type { Ban } from '@/types'
 
@@ -51,15 +53,17 @@ export default function Home() {
       return
     }
 
-    const { error } = await supabase.from('ban_votes').insert({
+    await supabase.from('ban_votes').insert({
       ban_id: banId,
       user_id: user.id,
       vote,
     })
 
-    if (!error) {
-      fetchBans()
-    }
+    setBans(prev => prev.map(b =>
+      b.id === banId
+        ? { ...b, upvotes: vote ? b.upvotes + 1 : b.upvotes, downvotes: !vote ? b.downvotes + 1 : b.downvotes }
+        : b
+    ))
   }
 
   const handleSearch = () => {
@@ -70,37 +74,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-cs2-dark">
-      <nav className="border-b border-cs2-light">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cs2-orange text-xl font-bold text-white">
-              CS2
-            </div>
-            <span className="text-xl font-bold text-white">Ban Tracker</span>
-          </div>
-          <div className="flex items-center gap-4">
-            {user ? (
-              <>
-                <span className="text-sm text-gray-400">{user.email}</span>
-                <button
-                  onClick={() => supabase.auth.signOut()}
-                  className="rounded-lg bg-cs2-light px-4 py-2 text-sm text-white hover:bg-gray-700"
-                >
-                  Sign Out
-                </button>
-              </>
-            ) : (
-              <a
-                href="/login"
-                className="rounded-lg bg-cs2-orange px-4 py-2 text-sm font-medium text-white hover:bg-orange-600"
-              >
-                Sign In
-              </a>
-            )}
-          </div>
-        </div>
-      </nav>
-
+      <Navbar />
       <div className="mx-auto max-w-6xl px-4 py-8">
         <section className="mb-12 text-center">
           <h1 className="mb-4 text-4xl font-bold text-white">
@@ -109,11 +83,9 @@ export default function Home() {
           <p className="mb-8 text-lg text-gray-400">
             Log VAC bans, game bans, and troll games. Help the community identify toxic players.
           </p>
-
           <div className="mb-8 flex justify-center">
             <BanTypeToggle value={category} onChange={setCategory} />
           </div>
-
           <div className="mx-auto max-w-xl">
             <SteamIdInput
               value={steamId}
@@ -122,15 +94,12 @@ export default function Home() {
             />
           </div>
         </section>
-
         <section>
           <h2 className="mb-6 text-2xl font-bold text-white">
             Recent {category === 'REAL' ? 'Bans' : 'Troll Games'}
           </h2>
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-cs2-orange border-t-transparent" />
-            </div>
+            <LoadingSpinner />
           ) : (
             <BanList
               bans={bans}

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function Login() {
   const [isSignUp, setIsSignUp] = useState(false)
@@ -14,6 +15,12 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
+  const { user } = useAuth()
+
+  if (user) {
+    router.push('/dashboard')
+    return null
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,13 +37,11 @@ export default function Login() {
         if (error) throw error
 
         if (data.user) {
-          const { error: profileError } = await supabase.from('profiles').insert({
+          await supabase.from('profiles').insert({
             id: data.user.id,
             username,
             steam_id: steamId || null,
           })
-
-          if (profileError) throw profileError
         }
 
         router.push('/dashboard')
@@ -47,7 +52,6 @@ export default function Login() {
         })
 
         if (error) throw error
-
         router.push('/dashboard')
       }
     } catch (err: any) {
@@ -61,7 +65,6 @@ export default function Login() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
     })
-
     if (error) setError(error.message)
   }
 

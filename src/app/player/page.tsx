@@ -5,52 +5,33 @@ import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { BanList } from '@/components/BanCard'
 import { MatchList, PlayerStats } from '@/components/MatchCard'
+import { Navbar } from '@/components/Navbar'
+import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { BanTypeToggle, BanCategory } from '@/components/BanTypeToggle'
 import type { Ban, Match, Profile } from '@/types'
 
 function PlayerContent() {
   const searchParams = useSearchParams()
   const steamId = searchParams.get('steamId') || ''
-
   const [profile, setProfile] = useState<Profile | null>(null)
   const [bans, setBans] = useState<Ban[]>([])
   const [matches, setMatches] = useState<Match[]>([])
   const [category, setCategory] = useState<BanCategory>('REAL')
-  const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<'bans' | 'matches'>('bans')
 
   useEffect(() => {
     if (!steamId) return
 
     const fetchData = async () => {
-      setLoading(true)
+      const [profileRes, bansRes, matchesRes] = await Promise.all([
+        supabase.from('profiles').select('*').eq('steam_id', steamId).single(),
+        supabase.from('bans').select('*, reporter:profiles(*), match:matches(*)').eq('steam_id', steamId).eq('category', category).order('created_at', { ascending: false }),
+        supabase.from('matches').select('*').eq('steam_id', steamId).order('date', { ascending: false })
+      ])
 
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('steam_id', steamId)
-        .single()
-
-      if (profileData) setProfile(profileData)
-
-      const { data: bansData } = await supabase
-        .from('bans')
-        .select('*, reporter:profiles(*), match:matches(*)')
-        .eq('steam_id', steamId)
-        .eq('category', category)
-        .order('created_at', { ascending: false })
-
-      if (bansData) setBans(bansData)
-
-      const { data: matchesData } = await supabase
-        .from('matches')
-        .select('*')
-        .eq('steam_id', steamId)
-        .order('date', { ascending: false })
-
-      if (matchesData) setMatches(matchesData)
-
-      setLoading(false)
+      if (profileRes.data) setProfile(profileRes.data)
+      if (bansRes.data) setBans(bansRes.data)
+      if (matchesRes.data) setMatches(matchesRes.data)
     }
 
     fetchData()
@@ -104,22 +85,8 @@ function PlayerContent() {
 export default function PlayerPage() {
   return (
     <div className="min-h-screen bg-cs2-dark">
-      <nav className="border-b border-cs2-light">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <a href="/" className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cs2-orange text-xl font-bold text-white">
-              CS2
-            </div>
-            <span className="text-xl font-bold text-white">Ban Tracker</span>
-          </a>
-        </div>
-      </nav>
-
-      <Suspense fallback={
-        <div className="flex min-h-screen items-center justify-center bg-cs2-dark">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-cs2-orange border-t-transparent" />
-        </div>
-      }>
+      <Navbar />
+      <Suspense fallback={<LoadingSpinner />}>
         <PlayerContent />
       </Suspense>
     </div>

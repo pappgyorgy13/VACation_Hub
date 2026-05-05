@@ -1,15 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { Search, User, Clock, MapPin, Crosshair } from 'lucide-react'
-import type { Match, MatchPlayer } from '@/types'
+import { Search, User, Clock, MapPin } from 'lucide-react'
+import type { Match } from '@/types'
 
-interface MatchCardProps {
-  match: Match
-  onClick?: () => void
-}
-
-export function MatchCard({ match, onClick }: MatchCardProps) {
+export function MatchCard({ match, onClick }: { match: Match; onClick?: () => void }) {
   return (
     <div
       onClick={onClick}
@@ -23,33 +17,20 @@ export function MatchCard({ match, onClick }: MatchCardProps) {
           <div>
             <p className="font-semibold text-white">{match.map || 'Unknown Map'}</p>
             <div className="mt-1 flex items-center gap-3 text-sm text-gray-400">
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {match.mode || 'Competitive'}
-              </span>
-              <span className="flex items-center gap-1">
-                <MapPin className="h-3 w-3" />
-                {match.duration ? `${Math.floor(match.duration / 60)} min` : 'Unknown'}
-              </span>
+              <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{match.mode || 'Competitive'}</span>
+              <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{match.duration ? `${Math.floor(match.duration / 60)} min` : 'Unknown'}</span>
             </div>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-sm text-gray-400">
-            {new Date(match.date).toLocaleDateString()}
-          </p>
+          <p className="text-sm text-gray-400">{new Date(match.date).toLocaleDateString()}</p>
         </div>
       </div>
     </div>
   )
 }
 
-interface MatchListProps {
-  matches: Match[]
-  onMatchClick?: (matchId: string) => void
-}
-
-export function MatchList({ matches, onMatchClick }: MatchListProps) {
+export function MatchList({ matches, onMatchClick }: { matches: Match[]; onMatchClick?: (id: string) => void }) {
   if (matches.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-cs2-light p-8 text-center text-gray-500">
@@ -57,7 +38,6 @@ export function MatchList({ matches, onMatchClick }: MatchListProps) {
       </div>
     )
   }
-
   return (
     <div className="space-y-3">
       {matches.map((match) => (
@@ -67,19 +47,11 @@ export function MatchList({ matches, onMatchClick }: MatchListProps) {
   )
 }
 
-interface SteamIdInputProps {
-  value: string
-  onChange: (value: string) => void
-  onSubmit: () => void
-  loading?: boolean
-}
-
-export function SteamIdInput({ value, onChange, onSubmit, loading }: SteamIdInputProps) {
+export function SteamIdInput({ value, onChange, onSubmit, loading }: { value: string; onChange: (v: string) => void; onSubmit: () => void; loading?: boolean }) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (value.trim()) onSubmit()
   }
-
   return (
     <form onSubmit={handleSubmit} className="flex gap-2">
       <div className="relative flex-1">
@@ -103,14 +75,7 @@ export function SteamIdInput({ value, onChange, onSubmit, loading }: SteamIdInpu
   )
 }
 
-interface PlayerStatsProps {
-  steamId: string
-  username?: string
-  banCount?: number
-  matchCount?: number
-}
-
-export function PlayerStats({ steamId, username, banCount = 0, matchCount = 0 }: PlayerStatsProps) {
+export function PlayerStats({ steamId, username, banCount = 0, matchCount = 0 }: { steamId: string; username?: string; banCount?: number; matchCount?: number }) {
   return (
     <div className="flex items-center gap-6 rounded-lg border border-cs2-light bg-cs2-gray p-4">
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-cs2-orange text-xl font-bold text-white">
