@@ -1,11 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY
+  ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
+  : null
 
 export async function POST(request: Request) {
+  if (!supabase) {
+    return Response.json({ error: 'Server misconfigured' }, { status: 500 })
+  }
+
   try {
     const { steam_id, match_id, map, mode, duration, date, players } = await request.json()
 
@@ -46,6 +49,10 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
+  if (!supabase) {
+    return Response.json({ error: 'Server misconfigured' }, { status: 500 })
+  }
+
   try {
     const { searchParams } = new URL(request.url)
     const steam_id = searchParams.get('steam_id')
