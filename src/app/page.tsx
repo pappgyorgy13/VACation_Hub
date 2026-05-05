@@ -64,7 +64,7 @@ export default function Home() {
 
   const handleSearch = () => {
     if (steamId) {
-      window.location.href = `/player/${steamId}`
+      window.location.href = `/player?steamId=${encodeURIComponent(steamId)}`
     }
   }
 
