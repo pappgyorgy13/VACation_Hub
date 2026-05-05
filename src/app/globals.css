@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cs2-orange: #f97316;
+  --cs2-dark: #0a0a0a;
+  --cs2-gray: #1a1a1a;
+  --vac-red: #dc2626;
+  --troll-purple: #9333ea;
+}
+
+body {
+  background-color: var(--cs2-dark);
+  color: white;
+}
