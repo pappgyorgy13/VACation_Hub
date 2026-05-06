@@ -32,6 +32,52 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Copy custom 404.html
+        run: |
+          cat > out/404.html << '404EOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CS2 Ban Tracker - Redirecting</title>
+  <style>
+    body { background: #0a0a0a; color: white; font-family: system-ui, sans-serif; height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center; text-align: center; }
+    h1 { color: #f97316; margin: 0; }
+    p { color: #9ca3af; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <div>
+    <h1>CS2 Ban Tracker</h1>
+    <p>Redirecting to player page...</p>
+  </div>
+  <script>
+    (function() {
+      var path = location.pathname;
+      var search = location.search;
+      var base = '/VACation_Hub';
+
+      if (path.endsWith('/player') || path === '/player') {
+        var target = base + '/player/index.html';
+        location.href = target + (search || '');
+      } else if (path.indexOf(base) === -1) {
+        var cleanPath = path.replace(/^\//, '');
+        if (cleanPath) {
+          location.href = base + '/' + cleanPath + '/index.html' + search;
+        } else {
+          location.href = base + '/index.html';
+        }
+      } else {
+        var remaining = path.substring(base.length);
+        if (remaining && !remaining.endsWith('/')) remaining += '/';
+        location.href = path + remaining + 'index.html' + search;
+      }
+    })();
+  </script>
+</body>
+</html>
+404EOF
       - uses: actions/upload-pages-artifact@v4
         with:
           path: out
